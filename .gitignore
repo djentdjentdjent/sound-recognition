@@ -1,0 +1,15 @@
+# Local Python environment
+.venv/
+
+# Downloaded datasets
+data/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter temporary files
+.ipynb_checkpoints/
+
+# macOS metadata
+.DS_Store

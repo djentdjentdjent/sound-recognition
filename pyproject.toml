@@ -1,0 +1,21 @@
+[project]
+name = "sound-recognition"
+version = "0.1.0"
+description = "A web application for environmental sound classification using machine learning"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jupyterlab>=4.6.3",
+    "librosa>=1.0.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
+    "pandas>=3.0.5",
+    "soundfile>=0.14.0",
+]
+
+[project.scripts]
+sound-recognition = "sound_recognition:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
