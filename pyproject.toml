@@ -10,11 +10,29 @@ dependencies = [
     "matplotlib>=3.11.2",
     "numpy>=2.5.3",
     "pandas>=3.0.5",
+    "scikit-learn>=1.9.1",
     "soundfile>=0.14.0",
 ]
 
 [project.scripts]
 sound-recognition = "sound_recognition:main"
+train-baselines = "sound_recognition.experiments:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.13.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
 
 [build-system]
 requires = ["uv_build>=0.12.13,<0.13.0"]

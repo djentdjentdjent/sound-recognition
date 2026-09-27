@@ -57,7 +57,23 @@ data/ESC-50/audio/
 data/ESC-50/meta/esc50.csv
 ```
 
-## Dataset Exploration
+## Audio Processing Pipeline
+
+Every recording is transformed by the same reusable pipeline:
+
+1. Downmix all channels to mono.
+2. Resample to 22,050 Hz.
+3. Crop or zero-pad to exactly 5 seconds (110,250 samples).
+4. Peak-normalize non-silent audio to an amplitude of 0.95.
+5. Extract 154 statistical features: MFCC, first- and second-order MFCC
+   deltas, chroma, spectral centroid, spectral bandwidth, spectral rolloff,
+   zero-crossing rate, and RMS energy.
+
+The implementation is in `src/sound_recognition/audio.py` and
+`src/sound_recognition/features.py`. It is shared by dataset experiments and
+will later be reused by the prediction service.
+
+## Notebooks
 
 Start JupyterLab:
 
@@ -65,15 +81,64 @@ Start JupyterLab:
 uv run jupyter lab
 ```
 
-Open `notebooks/01_esc50_exploration.ipynb`. The notebook checks the metadata and audio properties, provides playable examples, and displays a waveform and spectrogram.
+- `notebooks/01_esc50_exploration.ipynb` checks metadata and audio properties,
+  provides playable examples, and displays a waveform and spectrogram.
+- `notebooks/02_audio_features_and_baselines.ipynb` checks extracted features on
+  several classes, trains the first models, displays their metrics, and shows a
+  normalized confusion matrix.
+
+## Baseline Experiment
+
+Run the complete experiment from the repository root:
+
+```bash
+uv run train-baselines
+```
+
+The first run extracts features from all 2,000 recordings and creates
+`artifacts/cache/esc50_features.npz`. The cache is excluded from Git and makes
+later runs substantially faster. Delete it or add `--force-features` to repeat
+feature extraction from the WAV files.
+
+The evaluation follows the predefined ESC-50 split: folds 1–4 contain 1,600
+training recordings and fold 5 contains 400 test recordings. The current result
+is:
+
+| Model | Accuracy | Macro F1 |
+|---|---:|---:|
+| RBF support vector machine | 0.5525 | 0.5410 |
+| Random forest | 0.5575 | 0.5301 |
+| Logistic regression | 0.4950 | 0.4846 |
+| Most frequent class | 0.0200 | 0.0008 |
+
+Macro F1 is the primary comparison metric because it gives equal weight to every
+sound class. By this metric, the RBF support vector machine is the most promising
+of the initial models. Generated results are stored in `artifacts/results/`.
+
+## Quality Checks
+
+Run the automated tests and static checks:
+
+```bash
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+```
+
+The tests cover stereo-to-mono conversion, resampling, fixed-duration padding,
+peak normalization, silent input, and fixed-length finite feature extraction.
 
 ## Project Structure
 
 ```text
 sound-recognition/
+├── artifacts/
+│   ├── cache/            # Local feature cache excluded from Git
+│   └── results/          # Metrics and confusion analysis
 ├── data/                 # Local datasets excluded from Git
 ├── notebooks/            # Data exploration and experiments
-├── src/sound_recognition # Reusable application code
-├── pyproject.toml        # Project metadata and dependencies
+├── src/sound_recognition # Reusable audio and experiment code
+├── tests/                # Automated pipeline tests
+├── pyproject.toml        # Project metadata and tool settings
 └── uv.lock               # Locked dependency versions
 ```

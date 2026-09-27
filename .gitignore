@@ -4,6 +4,9 @@
 # Downloaded datasets
 data/
 
+# Reproducible but potentially large local feature cache
+artifacts/cache/
+
 # Python cache
 __pycache__/
 *.py[cod]

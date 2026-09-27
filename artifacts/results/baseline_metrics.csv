@@ -1,0 +1,5 @@
+model,accuracy,macro_f1,fit_seconds,prediction_ms_per_recording
+RBF support vector machine,0.552500,0.540977,0.155185,0.139860
+Random forest,0.557500,0.530084,0.631850,0.063539
+Logistic regression,0.495000,0.484618,0.112823,0.000629
+Most frequent class,0.020000,0.000784,0.003073,0.000069
