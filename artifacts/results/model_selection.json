@@ -1,0 +1,17 @@
+{
+  "model": "RBF support vector machine",
+  "representation": "improved",
+  "feature_count": 424,
+  "best_parameters": {
+    "classifier__C": 10.0,
+    "classifier__gamma": "scale"
+  },
+  "cross_validation_macro_f1": 0.5939221229575079,
+  "test_fold": 5,
+  "test_metrics": {
+    "accuracy": 0.625,
+    "macro_f1": 0.60369499090969,
+    "fit_seconds": 0.28344220796134323,
+    "prediction_ms_per_recording": 0.2518567701918073
+  }
+}

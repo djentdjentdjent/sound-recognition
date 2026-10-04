@@ -69,6 +69,11 @@ Every recording is transformed by the same reusable pipeline:
    deltas, chroma, spectral centroid, spectral bandwidth, spectral rolloff,
    zero-crossing rate, and RMS energy.
 
+The selected model uses an improved 424-value representation. It contains all
+154 baseline values plus the mean and standard deviation of 128 log-mel bands
+and seven spectral-contrast bands. The additional descriptors preserve more
+frequency-distribution information than MFCC values alone.
+
 The implementation is in `src/sound_recognition/audio.py` and
 `src/sound_recognition/features.py`. It is shared by dataset experiments and
 will later be reused by the prediction service.
@@ -115,6 +120,32 @@ Macro F1 is the primary comparison metric because it gives equal weight to every
 sound class. By this metric, the RBF support vector machine is the most promising
 of the initial models. Generated results are stored in `artifacts/results/`.
 
+## Improved Model Selection
+
+Run the model-selection experiment from the repository root:
+
+```bash
+uv run train-improved
+```
+
+The command compares baseline and improved feature representations. It tunes an
+RBF support vector machine and a random forest with four-fold cross-validation
+on ESC-50 folds 1-4. Fold 5 is excluded from all parameter selection and used
+exactly once to evaluate the selected configuration.
+
+The selected configuration is an RBF support vector machine with `C=10` and
+`gamma="scale"`, trained on the 424 improved features. Its results on fold 5 are:
+
+| Model | Features | Accuracy | Macro F1 |
+|---|---:|---:|---:|
+| Baseline RBF SVM | 154 | 0.5525 | 0.5410 |
+| Selected RBF SVM | 424 | **0.6250** | **0.6037** |
+
+The mean cross-validation macro F1 of the selected configuration is 0.5939.
+Generated artifacts include the complete tuning table, final comparison,
+per-class metrics, normalized confusion matrix, and largest confusion pairs.
+The feature cache is excluded from Git and reused on subsequent runs.
+
 ## Quality Checks
 
 Run the automated tests and static checks:
@@ -126,7 +157,8 @@ uv run ruff format --check .
 ```
 
 The tests cover stereo-to-mono conversion, resampling, fixed-duration padding,
-peak normalization, silent input, and fixed-length finite feature extraction.
+peak normalization, silent input, fixed-length feature extraction, and finite
+improved descriptors for both ordinary and silent audio.
 
 ## Project Structure
 

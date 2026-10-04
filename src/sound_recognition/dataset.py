@@ -8,7 +8,12 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from sound_recognition.audio import DEFAULT_AUDIO_CONFIG, AudioConfig, load_audio
-from sound_recognition.features import extract_features, feature_names
+from sound_recognition.features import (
+    extract_features,
+    extract_improved_features,
+    feature_names,
+    improved_feature_names,
+)
 
 REQUIRED_COLUMNS = {"filename", "fold", "target", "category", "esc10", "src_file"}
 
@@ -65,6 +70,31 @@ def extract_dataset_features(
         # experiments, and the future API use the same preparation operations.
         signal = load_audio(audio_path, config)
         matrix[position] = extract_features(signal, config)
+        if progress_callback is not None:
+            progress_callback(position + 1, total)
+
+    return matrix
+
+
+def extract_dataset_improved_features(
+    metadata: pd.DataFrame,
+    config: AudioConfig = DEFAULT_AUDIO_CONFIG,
+    progress_callback: Callable[[int, int], None] | None = None,
+) -> NDArray[np.float32]:
+    """Extract the improved representation for every validated metadata row."""
+
+    if "audio_path" not in metadata:
+        raise ValueError("Metadata must contain the validated 'audio_path' column.")
+
+    total = len(metadata)
+    number_of_features = len(improved_feature_names(config))
+    matrix = np.empty((total, number_of_features), dtype=np.float32)
+
+    for position, audio_path in enumerate(metadata["audio_path"]):
+        # Loading inside this function keeps the exact preprocessing sequence
+        # identical for model selection and the future inference module.
+        signal = load_audio(audio_path, config)
+        matrix[position] = extract_improved_features(signal, config)
         if progress_callback is not None:
             progress_callback(position + 1, total)
 

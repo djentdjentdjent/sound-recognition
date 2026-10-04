@@ -17,6 +17,7 @@ dependencies = [
 [project.scripts]
 sound-recognition = "sound_recognition:main"
 train-baselines = "sound_recognition.experiments:main"
+train-improved = "sound_recognition.improved_experiments:main"
 
 [dependency-groups]
 dev = [
