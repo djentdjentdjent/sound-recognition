@@ -28,6 +28,11 @@ class AudioConfig:
 
 
 DEFAULT_AUDIO_CONFIG = AudioConfig()
+SUPPORTED_AUDIO_EXTENSIONS = frozenset({".flac", ".ogg", ".wav"})
+
+
+class AudioLoadingError(ValueError):
+    """Report an audio file that cannot be decoded by the project pipeline."""
 
 
 def prepare_audio(
@@ -83,9 +88,29 @@ def load_audio(
 ) -> NDArray[np.float32]:
     """Read an audio file and return it in the project's standard format."""
 
-    audio_path = Path(path)
+    audio_path = Path(path).expanduser()
     if not audio_path.is_file():
         raise FileNotFoundError(f"Audio file does not exist: {audio_path}")
 
-    signal, source_sample_rate = sf.read(audio_path, always_2d=False, dtype="float32")
+    extension = audio_path.suffix.lower()
+    if extension not in SUPPORTED_AUDIO_EXTENSIONS:
+        supported = ", ".join(sorted(SUPPORTED_AUDIO_EXTENSIONS))
+        raise AudioLoadingError(
+            f"Unsupported audio file extension '{extension or '<none>'}'. "
+            f"Supported extensions: {supported}."
+        )
+
+    try:
+        # SoundFile validates the container and audio stream while decoding. The
+        # explicit dtype keeps input precision identical across supported formats.
+        signal, source_sample_rate = sf.read(
+            audio_path,
+            always_2d=False,
+            dtype="float32",
+        )
+    except (OSError, RuntimeError, ValueError) as error:
+        # A stable project-specific exception lets the future HTTP API turn all
+        # decoder failures into a clear client error without exposing internals.
+        raise AudioLoadingError(f"Could not decode audio file: {audio_path}") from error
+
     return prepare_audio(signal, source_sample_rate, config)

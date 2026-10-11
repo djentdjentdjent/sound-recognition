@@ -5,6 +5,7 @@ description = "A web application for environmental sound classification using ma
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "joblib>=1.5.3",
     "jupyterlab>=4.6.3",
     "librosa>=1.0.0",
     "matplotlib>=3.11.2",
@@ -18,6 +19,8 @@ dependencies = [
 sound-recognition = "sound_recognition:main"
 train-baselines = "sound_recognition.experiments:main"
 train-improved = "sound_recognition.improved_experiments:main"
+train-model = "sound_recognition.model_training:main"
+predict-sound = "sound_recognition.prediction:main"
 
 [dependency-groups]
 dev = [

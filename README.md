@@ -146,6 +146,48 @@ Generated artifacts include the complete tuning table, final comparison,
 per-class metrics, normalized confusion matrix, and largest confusion pairs.
 The feature cache is excluded from Git and reused on subsequent runs.
 
+## Application Model and Local Prediction
+
+Train the selected configuration on ESC-50 folds 1-4 and recreate the versioned
+application artifact:
+
+```bash
+uv run train-model
+```
+
+The command writes two files to `artifacts/model/`:
+
+- `sound_classifier.joblib` contains the fitted scaler and RBF SVM together
+  with the audio configuration, exact feature order, class order, and artifact
+  schema versions required for inference.
+- `model_metadata.json` is a human-readable description of the same model,
+  including package versions, fold 5 metrics, and end-to-end timing results.
+
+The saved model is loaded without retraining. Predict a supported WAV, FLAC, or
+OGG recording with:
+
+```bash
+uv run predict-sound path/to/recording.wav
+```
+
+The JSON result contains the three highest-ranked ESC-50 classes, normalized
+confidence values, and processing time. Confidence is calculated by applying
+softmax to the SVM one-vs-rest decision scores, so the values are useful for
+ranking but are not independently calibrated probabilities. Processing time
+includes decoding, resampling, normalization, feature extraction, confidence
+calculation, and ranking; model loading is excluded because the future server
+will load the artifact once and reuse it.
+
+The training command also validates the model on untouched fold 5. The saved
+artifact retains accuracy `0.6250` and macro F1 `0.6037`. On the current
+development machine, warm end-to-end inference averaged about 20 ms over 50
+recordings. The first prediction in a new process can be slower because audio
+libraries perform one-time initialization.
+
+Missing files, unsupported extensions, damaged containers, incompatible model
+versions, changed feature order, and invalid `top_k` values produce explicit
+errors instead of partial predictions.
+
 ## Quality Checks
 
 Run the automated tests and static checks:
@@ -158,7 +200,9 @@ uv run ruff format --check .
 
 The tests cover stereo-to-mono conversion, resampling, fixed-duration padding,
 peak normalization, silent input, fixed-length feature extraction, and finite
-improved descriptors for both ordinary and silent audio.
+improved descriptors for both ordinary and silent audio. They also cover model
+artifact loading, ranked confidence output, and rejection of unsupported or
+damaged files. The repository currently contains 12 passing tests.
 
 ## Project Structure
 
@@ -166,6 +210,7 @@ improved descriptors for both ordinary and silent audio.
 sound-recognition/
 ├── artifacts/
 │   ├── cache/            # Local feature cache excluded from Git
+│   ├── model/            # Versioned fitted model and readable metadata
 │   └── results/          # Metrics and confusion analysis
 ├── data/                 # Local datasets excluded from Git
 ├── notebooks/            # Data exploration and experiments

@@ -2358,6 +2358,7 @@ name = "sound-recognition"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "joblib" },
     { name = "jupyterlab" },
     { name = "librosa" },
     { name = "matplotlib" },
@@ -2375,6 +2376,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "joblib", specifier = ">=1.5.3" },
     { name = "jupyterlab", specifier = ">=4.6.3" },
     { name = "librosa", specifier = ">=1.0.0" },
     { name = "matplotlib", specifier = ">=3.11.2" },
