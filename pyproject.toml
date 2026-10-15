@@ -5,14 +5,17 @@ description = "A web application for environmental sound classification using ma
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.115,<1",
     "joblib>=1.5.3",
     "jupyterlab>=4.6.3",
     "librosa>=1.0.0",
     "matplotlib>=3.11.2",
     "numpy>=2.5.3",
     "pandas>=3.0.5",
+    "python-multipart>=0.0.20,<1",
     "scikit-learn>=1.9.1",
     "soundfile>=0.14.0",
+    "uvicorn>=0.34,<1",
 ]
 
 [project.scripts]
@@ -21,9 +24,11 @@ train-baselines = "sound_recognition.experiments:main"
 train-improved = "sound_recognition.improved_experiments:main"
 train-model = "sound_recognition.model_training:main"
 predict-sound = "sound_recognition.prediction:main"
+serve-api = "sound_recognition.api:main"
 
 [dependency-groups]
 dev = [
+    "httpx2>=2.13.1",
     "pytest>=8.4.2",
     "ruff>=0.13.2",
 ]

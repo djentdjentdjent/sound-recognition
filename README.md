@@ -76,7 +76,7 @@ frequency-distribution information than MFCC values alone.
 
 The implementation is in `src/sound_recognition/audio.py` and
 `src/sound_recognition/features.py`. It is shared by dataset experiments and
-will later be reused by the prediction service.
+the prediction service.
 
 ## Notebooks
 
@@ -188,6 +188,49 @@ Missing files, unsupported extensions, damaged containers, incompatible model
 versions, changed feature order, and invalid `top_k` values produce explicit
 errors instead of partial predictions.
 
+## HTTP API
+
+Start the FastAPI development server from the repository root:
+
+```bash
+uv run serve-api
+```
+
+The server loads `artifacts/model/sound_classifier.joblib` once during startup
+and reuses the same classifier for every request. Open the interactive Swagger
+documentation at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+The API provides three endpoints:
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/health` | Check that the server and its model are ready. |
+| `GET` | `/classes` | Return all 50 ESC-50 class labels. |
+| `POST` | `/predict` | Upload one recording and receive the top three classes. |
+
+Check server readiness:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Classify a local recording:
+
+```bash
+curl -X POST \
+  -F "file=@path/to/recording.wav;type=audio/wav" \
+  http://127.0.0.1:8000/predict
+```
+
+The upload endpoint accepts WAV, FLAC, and OGG containers up to 10 MiB. It
+checks the filename extension and declared media type, rejects empty or
+oversized bodies, and then lets the shared audio loader validate the actual
+container. HTTP 415 is returned for unsupported file types, HTTP 413 for files
+above the size limit, and HTTP 422 for empty or damaged audio. A successful
+response contains the original filename, three ranked labels with confidence
+scores, and complete model processing time in milliseconds. Temporary upload
+files are removed after both successful and failed requests.
+
 ## Quality Checks
 
 Run the automated tests and static checks:
@@ -201,8 +244,9 @@ uv run ruff format --check .
 The tests cover stereo-to-mono conversion, resampling, fixed-duration padding,
 peak normalization, silent input, fixed-length feature extraction, and finite
 improved descriptors for both ordinary and silent audio. They also cover model
-artifact loading, ranked confidence output, and rejection of unsupported or
-damaged files. The repository currently contains 12 passing tests.
+artifact loading, ranked confidence output, all three HTTP endpoints, upload
+size and type limits, temporary-file cleanup, and rejection of unsupported or
+damaged files. The repository currently contains 19 passing tests.
 
 ## Project Structure
 
@@ -214,7 +258,7 @@ sound-recognition/
 │   └── results/          # Metrics and confusion analysis
 ├── data/                 # Local datasets excluded from Git
 ├── notebooks/            # Data exploration and experiments
-├── src/sound_recognition # Reusable audio and experiment code
+├── src/sound_recognition # Reusable audio, model, experiment, and API code
 ├── tests/                # Automated pipeline tests
 ├── pyproject.toml        # Project metadata and tool settings
 └── uv.lock               # Locked dependency versions
