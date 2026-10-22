@@ -11,6 +11,9 @@ from typing import Annotated, Literal, Protocol
 import uvicorn
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile, status
 from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from sound_recognition.audio import SUPPORTED_AUDIO_EXTENSIONS, AudioLoadingError
@@ -20,6 +23,9 @@ from sound_recognition.prediction import AudioClassifier, PredictionResult
 DEFAULT_TOP_K = 3
 DEFAULT_MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 UPLOAD_CHUNK_BYTES = 64 * 1024
+PACKAGE_DIRECTORY = Path(__file__).resolve().parent
+STATIC_DIRECTORY = PACKAGE_DIRECTORY / "static"
+TEMPLATE_DIRECTORY = PACKAGE_DIRECTORY / "templates"
 
 # Browsers and command-line clients do not always agree on one media type for
 # the same audio container. The API accepts the established aliases below, but
@@ -167,6 +173,29 @@ def create_app(
         version="0.1.0",
         lifespan=lifespan,
     )
+    application.mount(
+        "/static",
+        StaticFiles(directory=STATIC_DIRECTORY),
+        name="static",
+    )
+    templates = Jinja2Templates(directory=TEMPLATE_DIRECTORY)
+
+    @application.get(
+        "/",
+        response_class=HTMLResponse,
+        include_in_schema=False,
+    )
+    def index(request: Request) -> HTMLResponse:
+        """Render the browser interface for the complete prediction workflow."""
+
+        return templates.TemplateResponse(
+            request=request,
+            name="index.html",
+            context={
+                "max_upload_bytes": max_upload_bytes,
+                "max_upload_size": f"{max_upload_bytes / (1024 * 1024):g}",
+            },
+        )
 
     @application.get(
         "/health",

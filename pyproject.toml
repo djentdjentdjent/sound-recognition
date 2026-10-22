@@ -8,6 +8,7 @@ dependencies = [
     "fastapi>=0.115,<1",
     "joblib>=1.5.3",
     "jupyterlab>=4.6.3",
+    "jinja2>=3.1,<4",
     "librosa>=1.0.0",
     "matplotlib>=3.11.2",
     "numpy>=2.5.3",

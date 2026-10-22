@@ -4,16 +4,16 @@ A web application for automatic environmental sound classification using machine
 
 ## Goal
 
-The application will allow a user to upload a short audio recording and receive the three most probable sound classes with confidence scores.
+The application allows a user to upload a short audio recording and receive the three most probable sound classes with confidence scores.
 
-## Planned MVP
+## MVP
 
 - Upload a short audio file.
 - Play the uploaded recording.
 - Classify the dominant environmental sound.
 - Display the three most probable classes.
 - Display confidence scores.
-- Show the waveform and spectrogram.
+- Show the waveform and spectrogram (planned for the next interface iteration).
 
 ## Dataset
 
@@ -231,6 +231,30 @@ response contains the original filename, three ranked labels with confidence
 scores, and complete model processing time in milliseconds. Temporary upload
 files are removed after both successful and failed requests.
 
+## Web Interface
+
+The FastAPI server also provides a browser interface at
+[http://127.0.0.1:8000](http://127.0.0.1:8000). Start it from the repository
+root:
+
+```bash
+uv run serve-api
+```
+
+The page supports the complete local recognition workflow:
+
+1. Choose or drag a WAV, FLAC, or OGG recording up to 10 MiB.
+2. Listen to the selected file in the built-in audio player.
+3. Select **Recognize sound** to send the file to `POST /predict`.
+4. Review the most likely class, confidence score, complete top-three ranking,
+   and model processing time.
+
+The interface checks the extension, file size, and empty files before upload.
+The API repeats all security-relevant validation because browser-side checks can
+be bypassed. While the request is running, the form displays a progress state
+and prevents duplicate submissions. Validation, decoding, and connection errors
+are shown next to the upload controls without discarding the selected recording.
+
 ## Quality Checks
 
 Run the automated tests and static checks:
@@ -246,7 +270,8 @@ peak normalization, silent input, fixed-length feature extraction, and finite
 improved descriptors for both ordinary and silent audio. They also cover model
 artifact loading, ranked confidence output, all three HTTP endpoints, upload
 size and type limits, temporary-file cleanup, and rejection of unsupported or
-damaged files. The repository currently contains 19 passing tests.
+damaged files. The browser page and its static assets are checked as well. The
+repository currently contains 20 passing tests.
 
 ## Project Structure
 
@@ -258,7 +283,7 @@ sound-recognition/
 │   └── results/          # Metrics and confusion analysis
 ├── data/                 # Local datasets excluded from Git
 ├── notebooks/            # Data exploration and experiments
-├── src/sound_recognition # Reusable audio, model, experiment, and API code
+├── src/sound_recognition # Reusable model, API, templates, CSS, and JavaScript
 ├── tests/                # Automated pipeline tests
 ├── pyproject.toml        # Project metadata and tool settings
 └── uv.lock               # Locked dependency versions

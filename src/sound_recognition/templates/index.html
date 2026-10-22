@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Распознавание окружающих звуков в коротких аудиозаписях.">
+    <title>Распознавание звуков</title>
+    <link rel="icon" href="{{ url_for('static', path='/favicon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+    <script src="{{ url_for('static', path='/app.js') }}" defer></script>
+  </head>
+  <body data-max-upload-bytes="{{ max_upload_bytes }}">
+    <main class="page-shell">
+      <header class="hero">
+        <div class="hero__copy">
+          <p class="eyebrow">Классификатор окружающих звуков</p>
+          <h1>Что это за звук?</h1>
+          <p class="hero__description">
+            Загрузите короткую запись, и модель покажет три наиболее вероятных
+            звука из 50 классов ESC-50.
+          </p>
+        </div>
+        <div class="service-status" id="service-status" aria-live="polite">
+          <span class="service-status__dot" aria-hidden="true"></span>
+          <span id="service-status-text">Проверяем состояние модели…</span>
+        </div>
+      </header>
+
+      <section class="workspace" aria-labelledby="upload-heading">
+        <div class="upload-panel">
+          <div class="section-heading">
+            <span class="step-number" aria-hidden="true">01</span>
+            <div>
+              <h2 id="upload-heading">Выберите запись</h2>
+              <p>WAV, FLAC или OGG · до {{ max_upload_size }} МБ</p>
+            </div>
+          </div>
+
+          <form id="prediction-form" novalidate>
+            <label class="drop-zone" id="drop-zone" for="audio-file">
+              <input
+                id="audio-file"
+                name="file"
+                type="file"
+                accept=".wav,.flac,.ogg,audio/wav,audio/flac,audio/ogg"
+                required
+              >
+              <span class="drop-zone__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img">
+                  <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3"/>
+                </svg>
+              </span>
+              <span class="drop-zone__title">Перетащите аудио сюда или выберите файл</span>
+              <span class="drop-zone__hint">Одна короткая запись окружающего звука</span>
+            </label>
+
+            <div class="file-preview" id="file-preview" hidden>
+              <div class="file-preview__meta">
+                <span class="file-preview__badge" aria-hidden="true">АУДИО</span>
+                <div>
+                  <strong id="file-name"></strong>
+                  <span id="file-size"></span>
+                </div>
+                <button type="button" class="text-button" id="remove-file">
+                  Удалить
+                </button>
+              </div>
+              <audio id="audio-preview" controls preload="metadata"></audio>
+            </div>
+
+            <button class="primary-button" id="submit-button" type="submit" disabled>
+              <span class="button-label">Распознать звук</span>
+              <span class="spinner" aria-hidden="true"></span>
+            </button>
+          </form>
+
+          <div class="message" id="message" role="status" aria-live="polite" hidden></div>
+        </div>
+
+        <div class="results-panel" id="results-panel" aria-labelledby="results-heading">
+          <div class="section-heading">
+            <span class="step-number" aria-hidden="true">02</span>
+            <div>
+              <h2 id="results-heading">Результат</h2>
+              <p>Три наиболее вероятных варианта</p>
+            </div>
+          </div>
+
+          <div class="results-empty" id="results-empty">
+            <div class="sound-mark" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <p>Результат появится здесь после обработки записи.</p>
+          </div>
+
+          <div class="results-content" id="results-content" hidden>
+            <article class="primary-result">
+              <span class="primary-result__label">Наиболее вероятный звук</span>
+              <strong id="primary-label"></strong>
+              <span id="primary-confidence"></span>
+            </article>
+
+            <ol class="prediction-list" id="prediction-list"></ol>
+            <p class="processing-time" id="processing-time"></p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <a href="/docs">Документация API</a>
+      </footer>
+    </main>
+
+    <template id="prediction-item-template">
+      <li class="prediction-item">
+        <span class="prediction-item__rank"></span>
+        <span class="prediction-item__label"></span>
+        <strong class="prediction-item__confidence"></strong>
+      </li>
+    </template>
+  </body>
+</html>

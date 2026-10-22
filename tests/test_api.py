@@ -59,6 +59,30 @@ def test_health_and_classes_describe_loaded_classifier() -> None:
     }
 
 
+def test_index_serves_browser_interface_and_static_assets() -> None:
+    """The root page should provide the complete upload interface and its assets."""
+
+    with TestClient(create_app(classifier=StubClassifier())) as client:
+        page_response = client.get("/")
+        style_response = client.get("/static/styles.css")
+        script_response = client.get("/static/app.js")
+        favicon_response = client.get("/static/favicon.svg")
+
+    assert page_response.status_code == 200
+    assert "text/html" in page_response.headers["content-type"]
+    assert 'id="prediction-form"' in page_response.text
+    assert 'id="audio-preview"' in page_response.text
+    assert 'id="prediction-list"' in page_response.text
+    assert "WAV, FLAC или OGG · до 10 МБ" in page_response.text
+    assert "Что это за звук?" in page_response.text
+    assert style_response.status_code == 200
+    assert "text/css" in style_response.headers["content-type"]
+    assert script_response.status_code == 200
+    assert "javascript" in script_response.headers["content-type"]
+    assert favicon_response.status_code == 200
+    assert "image/svg+xml" in favicon_response.headers["content-type"]
+
+
 def test_predict_returns_top_three_and_removes_temporary_file() -> None:
     """A valid upload should be classified and deleted after processing."""
 
