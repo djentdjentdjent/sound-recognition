@@ -73,8 +73,20 @@ def test_index_serves_browser_interface_and_static_assets() -> None:
     assert 'id="prediction-form"' in page_response.text
     assert 'id="audio-preview"' in page_response.text
     assert 'id="prediction-list"' in page_response.text
+    assert 'id="waveform-canvas"' in page_response.text
+    assert 'id="spectrogram-canvas"' in page_response.text
+    assert 'id="supported-class-list"' in page_response.text
+    assert 'role="progressbar"' in page_response.text
     assert "WAV, FLAC или OGG · до 10 МБ" in page_response.text
-    assert "Что это за звук?" in page_response.text
+    assert "Классификатор окружающих звуков" in page_response.text
+    assert "Полный список поддерживаемых звуков" in page_response.text
+    assert "ESC-50 - открытый набор" in page_response.text
+    assert "Что это за звук?" not in page_response.text
+    assert "Загрузите короткую запись" not in page_response.text
+    assert "Изменение амплитуды во времени" not in page_response.text
+    assert "Яркие участки соответствуют большей энергии" not in page_response.text
+    assert 'class="step-number"' not in page_response.text
+    assert "<details" not in page_response.text
     assert style_response.status_code == 200
     assert "text/css" in style_response.headers["content-type"]
     assert script_response.status_code == 200

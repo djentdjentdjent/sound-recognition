@@ -13,27 +13,15 @@
     <main class="page-shell">
       <header class="hero">
         <div class="hero__copy">
-          <p class="eyebrow">Классификатор окружающих звуков</p>
-          <h1>Что это за звук?</h1>
-          <p class="hero__description">
-            Загрузите короткую запись, и модель покажет три наиболее вероятных
-            звука из 50 классов ESC-50.
-          </p>
-        </div>
-        <div class="service-status" id="service-status" aria-live="polite">
-          <span class="service-status__dot" aria-hidden="true"></span>
-          <span id="service-status-text">Проверяем состояние модели…</span>
+          <h1>Классификатор окружающих звуков</h1>
         </div>
       </header>
 
       <section class="workspace" aria-labelledby="upload-heading">
         <div class="upload-panel">
           <div class="section-heading">
-            <span class="step-number" aria-hidden="true">01</span>
-            <div>
-              <h2 id="upload-heading">Выберите запись</h2>
-              <p>WAV, FLAC или OGG · до {{ max_upload_size }} МБ</p>
-            </div>
+            <h2 id="upload-heading">Выберите запись</h2>
+            <p>WAV, FLAC или OGG · до {{ max_upload_size }} МБ</p>
           </div>
 
           <form id="prediction-form" novalidate>
@@ -79,11 +67,8 @@
 
         <div class="results-panel" id="results-panel" aria-labelledby="results-heading">
           <div class="section-heading">
-            <span class="step-number" aria-hidden="true">02</span>
-            <div>
-              <h2 id="results-heading">Результат</h2>
-              <p>Три наиболее вероятных варианта</p>
-            </div>
+            <h2 id="results-heading">Результат</h2>
+            <p>Три наиболее вероятных варианта</p>
           </div>
 
           <div class="results-empty" id="results-empty">
@@ -104,6 +89,53 @@
             <p class="processing-time" id="processing-time"></p>
           </div>
         </div>
+
+        <section class="visualization-panel" id="visualization-panel" aria-labelledby="visualization-heading" hidden>
+          <div class="section-heading section-heading--wide">
+            <h2 id="visualization-heading">Анализ аудиосигнала</h2>
+            <p id="visualization-status" role="status" aria-live="polite">
+              Подготавливаем визуализации…
+            </p>
+          </div>
+
+          <div class="chart-grid" id="chart-grid">
+            <figure class="audio-chart">
+              <figcaption>
+                <strong>Звуковая волна</strong>
+              </figcaption>
+              <canvas
+                id="waveform-canvas"
+                role="img"
+                aria-label="График амплитуды выбранной аудиозаписи во времени"
+              ></canvas>
+            </figure>
+
+            <figure class="audio-chart">
+              <figcaption>
+                <strong>Спектрограмма</strong>
+              </figcaption>
+              <canvas
+                id="spectrogram-canvas"
+                role="img"
+                aria-label="Спектрограмма выбранной аудиозаписи: время по горизонтали и частота по вертикали"
+              ></canvas>
+            </figure>
+          </div>
+        </section>
+      </section>
+
+      <section class="sound-catalogue" aria-labelledby="sound-catalogue-heading">
+        <div class="sound-catalogue__heading">
+          <h2 id="sound-catalogue-heading">Полный список поддерживаемых звуков</h2>
+          <p>
+            ESC-50 - открытый набор из 2 000 пятисекундных записей окружающих
+            звуков, распределённых по 50 классам.
+          </p>
+        </div>
+
+        <div class="class-catalogue__list" id="supported-class-list" aria-live="polite">
+          Список загружается…
+        </div>
       </section>
 
       <footer>
@@ -116,6 +148,9 @@
         <span class="prediction-item__rank"></span>
         <span class="prediction-item__label"></span>
         <strong class="prediction-item__confidence"></strong>
+        <span class="prediction-item__track" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <span class="prediction-item__bar"></span>
+        </span>
       </li>
     </template>
   </body>

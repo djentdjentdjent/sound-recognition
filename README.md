@@ -12,8 +12,8 @@ The application allows a user to upload a short audio recording and receive the 
 - Play the uploaded recording.
 - Classify the dominant environmental sound.
 - Display the three most probable classes.
-- Display confidence scores.
-- Show the waveform and spectrogram (planned for the next interface iteration).
+- Display confidence scores as percentages and comparison bars.
+- Show the waveform and spectrogram for the selected recording.
 
 ## Dataset
 
@@ -245,9 +245,19 @@ The page supports the complete local recognition workflow:
 
 1. Choose or drag a WAV, FLAC, or OGG recording up to 10 MiB.
 2. Listen to the selected file in the built-in audio player.
-3. Select **Recognize sound** to send the file to `POST /predict`.
-4. Review the most likely class, confidence score, complete top-three ranking,
+3. Review the waveform and spectrogram calculated locally for the first five
+   seconds, which is the same interval used by the model.
+4. Select **Recognize sound** to send the file to `POST /predict`.
+5. Review the most likely class, confidence score, visual top-three comparison,
    and model processing time.
+
+The visualization uses the browser Web Audio API and canvas rather than an
+external chart service. It downmixes the decoded file to one channel, applies
+the same peak normalization as the server pipeline, draws the waveform, and
+calculates a short-time Fourier transform for the spectrogram. The page also
+briefly explains the ESC-50 dataset and displays the complete translated class
+catalogue from `GET /classes` without an extra interaction. Its chart grid,
+prediction cards, and catalogue adapt to tablet and mobile screen widths.
 
 The interface checks the extension, file size, and empty files before upload.
 The API repeats all security-relevant validation because browser-side checks can
